@@ -1,24 +1,19 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends, Request, Body
 from app.schemas.user_schema import RegisterRequest, UserResponse
-from app.services.auth_service import register_user
-
 from app.schemas.user_schema import LoginRequest, TokenResponse
-from app.services.auth_service import login_user
-
+from app.services.auth_service import register_user, login_user, refresh_access_token
 from app.core.security import get_current_user
-from fastapi import Depends
 
 from app.core.rate_limiter import limiter
-from fastapi import Request
-
-from fastapi import Body
-from app.services.auth_service import refresh_access_token
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+
+# 🔐 Register (limit brute-force account creation)
 @router.post("/register", response_model=UserResponse)
-async def register(data: RegisterRequest):
+@limiter.limit("5/minute")
+async def register(request: Request, data: RegisterRequest):
     try:
         user = await register_user(data)
         return UserResponse(
@@ -31,7 +26,7 @@ async def register(data: RegisterRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-
+# 🔐 Login (limit brute-force login attempts)
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("5/minute")
 async def login(request: Request, data: LoginRequest):
@@ -39,10 +34,12 @@ async def login(request: Request, data: LoginRequest):
         return await login_user(data.email, data.password)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
 
+
+# 👤 Get current user (optional rate limit)
 @router.get("/me")
-async def get_me(current_user = Depends(get_current_user)):
+@limiter.limit("20/minute")
+async def get_me(request: Request, current_user=Depends(get_current_user)):
     return {
         "id": str(current_user.id),
         "name": current_user.name,
@@ -51,8 +48,10 @@ async def get_me(current_user = Depends(get_current_user)):
     }
 
 
+# 🔄 Refresh token (protect against abuse)
 @router.post("/refresh")
-async def refresh_token(refresh_token: str = Body(...)):
+@limiter.limit("10/minute")
+async def refresh_token(request: Request, refresh_token: str = Body(...)):
     try:
         return await refresh_access_token(refresh_token)
     except ValueError as e:

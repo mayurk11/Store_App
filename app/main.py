@@ -8,6 +8,7 @@ from app.routes.visit_routes import router as visit_router
 from app.routes.admin_routes import router as admin_router
 # Rate Limiting
 from app.core.rate_limiter import limiter
+from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
 from fastapi import Request
@@ -36,30 +37,30 @@ app = FastAPI(
 )
 
 # # Rate Limiting
-# limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
 
-# CORS Middleware - Allowing frontend running on localhost:3000 to access the API
 
-# origins = ["*"]  You can specify your frontend URL here, e.g. ["http://localhost:3000"]
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request, exc):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Too many requests. Please try again later."},
+    )
+
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+    "http://localhost:3000",
+    "http://localhost:3001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
-
-@app.exception_handler(RateLimitExceeded)
-async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
-    print(f"Rate limit exceeded ")
-    return JSONResponse(
-        status_code=429,
-        content={"detail": "Too many requests. Please slow down."}
-    )
 
     
 
