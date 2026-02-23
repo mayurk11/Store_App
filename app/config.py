@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
 
-
 load_dotenv()
+
 
 class Settings:
     # Database
@@ -14,5 +14,9 @@ class Settings:
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", 7))
+
+    def __repr__(self):
+        return f"Settings(DB={self.DATABASE_NAME})"
+
 
 settings = Settings()

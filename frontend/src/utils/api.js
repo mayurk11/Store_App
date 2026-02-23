@@ -1,5 +1,3 @@
-// const API_BASE = "http://backend:8000"; // Direct backend URL for development
-// const API_BASE = "/api"; // Proxy through nginx
 const API_BASE = "http://127.0.0.1:8000";
 
 

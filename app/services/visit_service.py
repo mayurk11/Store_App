@@ -3,6 +3,7 @@ from datetime import datetime
 from app.models.visit_model import Visit
 
 UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 async def create_visit(visitor_id: str, file):
     os.makedirs(UPLOAD_DIR, exist_ok=True)
