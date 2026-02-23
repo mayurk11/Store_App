@@ -17,9 +17,6 @@ import os
 # CORS
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-# Logging
-# import logging
-# from logging.handlers import TimedRotatingFileHandler
 
 
 # database initialization
@@ -89,4 +86,3 @@ async def root():
     
     return {"message": "Store Visit API is running 🚀"}
     
-
