@@ -20,7 +20,8 @@ export const apiFetch = async (url, options = {}) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(refreshToken),
+      body: JSON.stringify({refresh_token: refreshToken,}),
+
     });
 
     if (refreshResponse.ok) {

@@ -7,11 +7,11 @@ from app.routes.auth_routes import router as auth_router
 from app.routes.visit_routes import router as visit_router
 from app.routes.admin_routes import router as admin_router
 # Rate Limiting
-from app.core.rate_limiter import limiter
-from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
-from fastapi.responses import JSONResponse
-from fastapi import Request
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from app.core.rate_limiter import limiter 
+
 # Static Files
 from fastapi.staticfiles import StaticFiles
 import os
@@ -40,6 +40,7 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 
+from fastapi.responses import JSONResponse
 
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_handler(request, exc):
@@ -50,11 +51,11 @@ async def rate_limit_handler(request, exc):
 
 
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:3000",
-    "http://localhost:3001"],
+    "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

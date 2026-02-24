@@ -6,9 +6,11 @@ import StatusBadge from "../components/StatusBadge";
 
 function AdminDashboard() {
   const [visits, setVisits] = useState([]);
+  const [users, setUsers] = useState([]);   // ✅ Added
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  // ===== Fetch Visits =====
   const fetchVisits = async () => {
     const response = await apiFetch("/admin/visits");
     if (response.ok) {
@@ -17,10 +19,21 @@ function AdminDashboard() {
     }
   };
 
+  // ===== Fetch Registered Users =====
+  const fetchUsers = async () => {
+    const response = await apiFetch("/admin/users");
+    if (response.ok) {
+      const data = await response.json();
+      setUsers(data);
+    }
+  };
+
   useEffect(() => {
     fetchVisits();
+    fetchUsers();   // ✅ Important
   }, []);
 
+  // ===== Approve / Reject Visit =====
   const reviewVisit = async (id, status) => {
     const response = await apiFetch(
       `/admin/visits/${id}?status=${status}`,
@@ -35,7 +48,7 @@ function AdminDashboard() {
     }
   };
 
-  // 🔎 Filtering Logic
+  // ===== Filtering Logic =====
   let filteredVisits = visits.filter((visit) =>
     visit.visitor_id
       ?.toString()
@@ -52,13 +65,13 @@ function AdminDashboard() {
   return (
     <DashboardLayout>
 
-      {/* ===== Top Control Bar ===== */}
+      {/* ===== VISIT SECTION ===== */}
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">
+        Visit Review Panel
+      </h2>
+
+      {/* Top Controls */}
       <div className="flex flex-col lg:flex-row gap-4 justify-between items-center mb-8">
-
-        <h2 className="text-2xl font-bold text-gray-800">
-          Admin Review Panel
-        </h2>
-
         <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
 
           {/* Search */}
@@ -85,11 +98,11 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* ===== Cards ===== */}
+      {/* Visit Cards */}
       {filteredVisits.length === 0 ? (
-        <p className="text-gray-500">No visits found.</p>
+        <p className="text-gray-500 mb-12">No visits found.</p>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {filteredVisits.map((visit) => (
             <div
               key={visit.visit_id}
@@ -138,7 +151,46 @@ function AdminDashboard() {
         </div>
       )}
 
-      
+      {/* ===== REGISTERED USERS SECTION ===== */}
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">
+        Registered Users
+      </h2>
+
+      {users.length === 0 ? (
+        <p className="text-gray-500">No users registered.</p>
+      ) : (
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <table className="w-full text-left">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-4">Name</th>
+                <th className="p-4">Email</th>
+                <th className="p-4">Role</th>
+                <th className="p-4">Registered</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id} className="border-t hover:bg-gray-50">
+                  <td className="p-4 font-medium text-gray-800">
+                    {user.name}
+                  </td>
+                  <td className="p-4 text-gray-600">
+                    {user.email}
+                  </td>
+                  <td className="p-4 uppercase font-semibold text-blue-600">
+                    {user.role}
+                  </td>
+                  <td className="p-4 text-gray-500">
+                    {new Date(user.created_at).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
     </DashboardLayout>
   );

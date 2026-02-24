@@ -7,7 +7,7 @@ from fastapi import Depends, HTTPException, status
 from jose import JWTError
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.models.user_model import User
-
+import os
 from fastapi import HTTPException, status
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -72,7 +72,7 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found"
         )
-
+   
     return user
 
 
