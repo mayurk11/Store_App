@@ -1,6 +1,4 @@
 
-<<<<<<< HEAD
-
 # to run backend use command - python -m uvicorn app.main:app --reload   (run form base folder)
 # to frontend use command - npm start / npm run dev
 =======
@@ -32,4 +30,3 @@ A high-performance full-stack application using FastAPI for backend and React fo
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
->>>>>>> 9a9a88c89b8471f164348ef9a6587460b6f2aa25
